@@ -9,9 +9,15 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/loading-spinner";
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "DriveX - Storage System",
+  description: "Secure cloud storage solution for all your files",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({

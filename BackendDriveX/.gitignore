@@ -1,4 +1,11 @@
+### Sensitive Configuration Files ###
+# Never commit files with actual secrets/credentials
 application.properties
+application-*.properties
+*.env
+.env
+.env.*
+!.env.example
 
 HELP.md
 target/
