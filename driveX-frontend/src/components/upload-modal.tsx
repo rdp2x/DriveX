@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ButtonSpinner from "@/components/button-spinner";
 
 type Props = {
   open: boolean;
@@ -126,7 +127,7 @@ export default function UploadModal({
               onClick={onSubmit}
               disabled={loading || !files || files.length === 0 || !token}
             >
-              {loading ? "Uploading..." : "Upload"}
+              {loading ? <ButtonSpinner /> : "Upload"}
             </Button>
           </div>
         </div>

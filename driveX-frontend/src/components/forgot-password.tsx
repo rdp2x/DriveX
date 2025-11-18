@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IS_MOCK, authAPI } from "@/lib/api";
+import ButtonSpinner from "@/components/button-spinner";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -189,7 +190,7 @@ export default function ForgotPasswordForm() {
             </button>
           </div>
 
-          <h1>Forgot Password?</h1>
+          <p>Forgot Password?</p>
           <p>
             Enter your email address and we'll send you a link to reset your
             password.
@@ -212,7 +213,7 @@ export default function ForgotPasswordForm() {
           {error && <span className="error-message">{error}</span>}
 
           <button type="submit" disabled={loading} className="submit-btn">
-            {loading ? "Sending..." : "Send Reset Link"}
+            {loading ? <ButtonSpinner /> : "Send Reset Link"}
           </button>
         </form>
       </div>

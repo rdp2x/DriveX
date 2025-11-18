@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/context/auth-context"
+import ButtonSpinner from "@/components/button-spinner"
 
 type Props = {
   open: boolean
@@ -84,7 +85,7 @@ export default function SettingsModal({ open, onOpenChange }: Props) {
               {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="flex justify-end">
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Updating..." : "Update Password"}
+                  {loading ? <ButtonSpinner /> : "Update Password"}
                 </Button>
               </div>
             </form>

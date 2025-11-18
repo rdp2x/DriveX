@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 import { Suspense } from "react";
+import LoadingSpinner from "@/components/loading-spinner";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -37,7 +38,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <LoadingSpinner />
+            </div>
+          }
+        >
           <AuthProvider>{children}</AuthProvider>
         </Suspense>
         <Analytics />

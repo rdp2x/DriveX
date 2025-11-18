@@ -8,9 +8,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Calendar, Shield, X, HardDrive } from "lucide-react";
+import { Mail, Calendar, HardDrive, LogOut } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { fileAPI, authAPI } from "@/lib/api";
+import LoadingSpinner from "@/components/loading-spinner";
+import { useRouter } from "next/navigation";
 
 type Props = {
   open: boolean;
@@ -18,8 +20,11 @@ type Props = {
 };
 
 export default function ProfileModal({ open, onOpenChange }: Props) {
-  const { token, user, setUser } = useAuth();
+  const { token, user, setUser, logout } = useAuth();
+  const router = useRouter();
   const [showPasswordMessage, setShowPasswordMessage] = React.useState(false);
+  const [passwordError, setPasswordError] = React.useState<string | null>(null);
+  const [isResettingPassword, setIsResettingPassword] = React.useState(false);
   const [storageData, setStorageData] = React.useState<{
     storageUsed: string;
     storageTotal: string;
@@ -81,35 +86,48 @@ export default function ProfileModal({ open, onOpenChange }: Props) {
     }
   }, [open, token]);
 
-  const handleChangePassword = () => {
-    setShowPasswordMessage(true);
-    // Auto-hide message after 5 seconds
-    setTimeout(() => {
-      setShowPasswordMessage(false);
-    }, 5000);
+  const handleChangePassword = async () => {
+    if (!user?.email) {
+      setPasswordError("Email not found. Please try logging in again.");
+      return;
+    }
+
+    setIsResettingPassword(true);
+    setPasswordError(null);
+    setShowPasswordMessage(false);
+
+    try {
+      await authAPI.forgotPassword(user.email);
+      setShowPasswordMessage(true);
+      // Auto-hide message after 5 seconds
+      setTimeout(() => {
+        setShowPasswordMessage(false);
+      }, 5000);
+    } catch (error: any) {
+      setPasswordError(error.message || "Failed to send password reset email");
+      // Auto-hide error after 5 seconds
+      setTimeout(() => {
+        setPasswordError(null);
+      }, 5000);
+    } finally {
+      setIsResettingPassword(false);
+    }
   };
 
-  const handleUpdateDetails = () => {
-    // In a real app, this would open an edit form or navigate to an edit page
-    console.log("Update details clicked");
+  const handleLogout = () => {
+    logout();
+    onOpenChange(false);
+    router.replace("/auth");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-full bg-card/90 backdrop-blur-md border-gray-800">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <DialogTitle className="text-xl font-semibold">Profile</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onOpenChange(false)}
-            className="hover:bg-destructive/20"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+      <DialogContent className="w-[400px] min-h-[500px] bg-card/90 backdrop-blur-md border-gray-800" style={{ maxWidth: '400px' }}>
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-center">Profile</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* User Basic Info */}
           <div className="text-center">
             <h2 className="text-xl font-semibold">{user?.name || "User"}</h2>
@@ -132,33 +150,26 @@ export default function ProfileModal({ open, onOpenChange }: Props) {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Member Since</p>
-                  <p className="text-xs text-muted-foreground">
-                    {user?.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
-                      : "Loading..."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">Plan</p>
-                  <p className="text-xs text-muted-foreground">Premium</p>
+                  <div className="text-xs text-muted-foreground">
+                    {user?.createdAt ? (
+                      new Date(user.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    ) : (
+                      <LoadingSpinner size="small" />
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <HardDrive className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Storage</p>
+                  <p className="text-sm font-medium">Storage Used</p>
                   <p className="text-xs text-muted-foreground">
-                    {storageData.storageUsed} of {storageData.storageTotal} used
-                    • {storageData.filesCount} files
+                    {storageData.storageUsed} • {storageData.filesCount} files
                   </p>
                 </div>
               </div>
@@ -167,28 +178,39 @@ export default function ProfileModal({ open, onOpenChange }: Props) {
 
           {/* Password Reset Message */}
           {showPasswordMessage && (
-            <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
-              <p className="text-sm text-primary">
-                ✓ Password reset link has been sent to your email.
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+              <p className="text-sm text-green-600 dark:text-green-400">
+                ✓ Password reset link has been sent to {user?.email}
+              </p>
+            </div>
+          )}
+
+          {/* Password Error Message */}
+          {passwordError && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                ✗ {passwordError}
               </p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="space-y-3 pt-4 border-t border-border">
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={handleUpdateDetails}
-            >
-              Update Details
-            </Button>
+          <div className="border-t border-border pt-4 space-y-2">
             <Button
               className="w-full"
               variant="secondary"
               onClick={handleChangePassword}
+              disabled={isResettingPassword}
             >
-              Change Password
+              {isResettingPassword ? "Sending..." : "Change Password"}
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>

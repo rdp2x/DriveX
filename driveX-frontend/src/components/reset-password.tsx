@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authAPI } from "@/lib/api";
+import LoadingSpinner from "@/components/loading-spinner";
 
 const resetPasswordSchema = z
   .object({
@@ -29,11 +30,21 @@ export default function ResetPasswordForm() {
   const [success, setSuccess] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [token, setToken] = React.useState<string | null>(null);
+  const [pageLoading, setPageLoading] = React.useState(true);
 
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
   });
+
+  React.useEffect(() => {
+    // Show loading animation for 300ms to let CSS load
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   React.useEffect(() => {
     const tokenFromUrl = searchParams.get("token");
@@ -300,6 +311,20 @@ export default function ResetPasswordForm() {
             transform: translateY(-1px);
           }
         `}</style>
+      </div>
+    );
+  }
+
+  if (pageLoading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(193, 207, 214, 1) 70%, rgba(252, 244, 227, 1) 99%)",
+        }}
+      >
+        <LoadingSpinner />
       </div>
     );
   }

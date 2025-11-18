@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/context/auth-context";
 import { initiateGoogleOAuth } from "@/lib/supabase-oauth";
 import { authAPI } from "@/lib/api";
+import LoadingSpinner from "@/components/loading-spinner";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -36,6 +37,7 @@ export default function ModernAuthForm() {
   const [isActive, setIsActive] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [isPageLoaded, setIsPageLoaded] = React.useState(false);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -46,6 +48,16 @@ export default function ModernAuthForm() {
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
+
+  // Show loading animation until page is fully loaded
+  React.useEffect(() => {
+    // Small delay to ensure styles are loaded
+    const timer = setTimeout(() => {
+      setIsPageLoaded(true);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = async (values: LoginValues) => {
     setLoading(true);
@@ -137,6 +149,21 @@ export default function ModernAuthForm() {
       setLoading(false);
     }
   };
+
+  // Show loading animation while page loads
+  if (!isPageLoaded) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(193, 207, 214, 1) 70%, rgba(252, 244, 227, 1) 99%)",
+        }}
+      >
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -280,20 +307,22 @@ export default function ModernAuthForm() {
                 {loginForm.formState.errors.email.message}
               </span>
             )}
-            <input
-              type="password"
-              placeholder="Password"
-              className={loginForm.formState.errors.password ? "error" : ""}
-              {...loginForm.register("password")}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type="password"
+                placeholder="Password"
+                className={loginForm.formState.errors.password ? "error" : ""}
+                {...loginForm.register("password")}
+              />
+              <Link href="/forgot-password" className="forgot-password-link">
+                Forgot password?
+              </Link>
+            </div>
             {loginForm.formState.errors.password && (
               <span className="error-message">
                 {loginForm.formState.errors.password.message}
               </span>
             )}
-            <Link href="/forgot-password" className="forgot-password-link">
-              Forget Your Password?
-            </Link>
             {error && <span className="error-message">{error}</span>}
             <button type="submit" disabled={loading}>
               {loading ? "Signing In..." : "Sign In"}
@@ -377,18 +406,42 @@ export default function ModernAuthForm() {
         }
 
         .forgot-password-link {
-          color: #d97d55 !important;
-          font-size: 12px !important;
+          color: #6fa4af !important;
+          font-size: 10px !important;
           text-decoration: none !important;
-          margin: 8px 0 15px 0 !important;
-          display: inline-block !important;
-          transition: all 0.3s ease !important;
+          transition: all 0.2s ease !important;
           cursor: pointer !important;
+          font-weight: 400 !important;
+          position: absolute !important;
+          right: 0 !important;
+          bottom: -18px !important;
         }
 
         .forgot-password-link:hover {
-          color: #6fa4af !important;
+          color: #d97d55 !important;
           text-decoration: underline !important;
+        }
+
+        .password-input-wrapper {
+          position: relative !important;
+          margin-bottom: 0 !important;
+        }
+
+        .password-input-wrapper input {
+          width: 100% !important;
+        }
+
+        .password-footer {
+          display: flex !important;
+          justify-content: flex-end !important;
+          align-items: flex-start !important;
+          min-height: 18px !important;
+          margin-bottom: 8px !important;
+          gap: 8px !important;
+        }
+
+        .password-footer .error-message {
+          flex: 1 !important;
         }
 
         .auth-container h1 {

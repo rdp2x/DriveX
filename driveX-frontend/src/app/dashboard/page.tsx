@@ -11,6 +11,7 @@ import { useAuth } from "@/context/auth-context";
 import type { FileItem } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import LoadingSpinner from "@/components/loading-spinner";
 
 function kindFromMime(mime: string) {
   if (mime.startsWith("image/")) return "image";
@@ -27,7 +28,7 @@ function kindFromMime(mime: string) {
 }
 
 export default function DashboardPage() {
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
   const [query, setQuery] = React.useState("");
   const [filter, setFilter] = React.useState<string>("all");
   const [uploadOpen, setUploadOpen] = React.useState(false);
@@ -81,10 +82,19 @@ export default function DashboardPage() {
 
   // Simple client-side route guard
   React.useEffect(() => {
-    if (!token) {
+    if (!authLoading && !token) {
       window.location.replace("/auth");
     }
-  }, [token]);
+  }, [token, authLoading]);
+
+  // Show loading screen while checking auth
+  if (authLoading || !token) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <main className="h-dvh overflow-hidden">
@@ -99,8 +109,8 @@ export default function DashboardPage() {
           />
           <section className="h-full pt-6 overflow-y-auto">
             {isLoading && (
-              <div className="text-sm text-muted-foreground p-4">
-                Loading files...
+              <div className="flex items-center justify-center p-8">
+                <LoadingSpinner size="small" />
               </div>
             )}
             {error && (

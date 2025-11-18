@@ -1,7 +1,6 @@
 package com.rdp.backenddrivex.service;
 
 import com.rdp.backenddrivex.config.JwtProperties;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.rdp.backenddrivex.dto.request.ChangePasswordRequest;
 import com.rdp.backenddrivex.dto.request.LoginRequest;
 import com.rdp.backenddrivex.dto.request.RegisterRequest;

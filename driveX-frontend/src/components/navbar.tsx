@@ -3,15 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { User, LogOut, Search } from "lucide-react";
+import { User, Search } from "lucide-react";
 import * as React from "react";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
@@ -49,33 +41,16 @@ export default function Navbar({ onOpenProfile, onSearch }: Props) {
             />
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="ml-2 rounded-full focus-visible:outline-none">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="text-lg">DX</AvatarFallback>
-              </Avatar>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onOpenProfile}>
-              <User className="h-4 w-4 mr-2" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                logout();
-                router.replace("/auth");
-              }}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <button 
+          onClick={onOpenProfile}
+          className="ml-2 rounded-full focus-visible:outline-none hover:opacity-80 transition-opacity"
+        >
+          <Avatar className="h-12 w-12 bg-primary/10">
+            <AvatarFallback className="text-lg">
+              <User className="h-6 w-6" />
+            </AvatarFallback>
+          </Avatar>
+        </button>
       </div>
     </header>
   );
