@@ -15,9 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +73,6 @@ public class SupabaseAuthService {
     public User createOrUpdateUserFromSupabase(JsonNode supabaseUser) {
         String email = supabaseUser.get("email").asText();
         String name = extractUserName(supabaseUser);
-        String supabaseId = supabaseUser.get("id").asText();
         
         // Check if user already exists
         Optional<User> existingUser = userRepository.findByEmail(email);
