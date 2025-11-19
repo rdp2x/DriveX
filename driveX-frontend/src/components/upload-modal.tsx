@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ButtonSpinner from "@/components/button-spinner";
+import { Dropzone, FileListPreview } from "@/components/dropzone";
 
 type Props = {
   open: boolean;
@@ -24,21 +25,21 @@ export default function UploadModal({
   token,
   onUploaded,
 }: Props) {
-  const [files, setFiles] = React.useState<FileList | null>(null);
+  const [files, setFiles] = React.useState<File[]>([]);
   const [progress, setProgress] = React.useState<number>(0);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [currentFile, setCurrentFile] = React.useState<string | null>(null);
 
   const onSubmit = async () => {
-    if (!files || files.length === 0 || !token) return;
+  if (!files || files.length === 0 || !token) return;
     setLoading(true);
     setError(null);
     setProgress(0);
 
     try {
-      const { fileAPI } = await import("@/lib/api");
-      const fileArray = Array.from(files);
+  const { fileAPI } = await import("@/lib/api");
+  const fileArray = files;
       let uploadedCount = 0;
 
       // Upload files one by one
@@ -60,7 +61,7 @@ export default function UploadModal({
       onOpenChange(false);
 
       // Reset form state
-      setFiles(null);
+  setFiles([]);
       setProgress(0);
     } catch (e: any) {
       setError(e.message || "Upload failed");
@@ -72,7 +73,7 @@ export default function UploadModal({
   // Reset form when dialog closes
   React.useEffect(() => {
     if (!open) {
-      setFiles(null);
+  setFiles([]);
       setProgress(0);
       setError(null);
       setCurrentFile(null);
@@ -86,10 +87,20 @@ export default function UploadModal({
           <DialogTitle>Upload files</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4">
+          <Dropzone
+            multiple
+            onFiles={(newFiles) =>
+              setFiles((prev) => [...prev, ...newFiles])
+            }
+            disabled={!token || loading}
+          />
+          <FileListPreview files={files} />
+          <div className="text-xs text-muted-foreground">Or select files</div>
           <Input
             type="file"
             multiple
-            onChange={(e) => setFiles(e.target.files)}
+            onChange={(e) => setFiles(Array.from(e.target.files || []))}
+            disabled={!token || loading}
           />
           {!token && (
             <p className="text-sm text-destructive">
